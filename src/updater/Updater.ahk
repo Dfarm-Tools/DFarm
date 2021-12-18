@@ -1,5 +1,4 @@
 ;AHKv2
-#Include CNG.ahk
 
 class Updater {
     __New() {
@@ -29,14 +28,13 @@ class Updater {
     }
 
     CheckForUpdate() {
-
       checkUpdateGui := Gui("-Caption", "DFarm - Check Update")
       checkUpdateGui.Add("Text","w250", "DFarm::")
       Text := checkUpdateGui.Add("Text","w250", "Recherche de mise a jour ... ")
       checkUpdateGui.Show("w250")
   
       whr := ComObject("WinHttp.WinHttpRequest.5.1")
-      whr.Open("GET", "https://api.dfarm.fr/release/last/version")
+      whr.Open("GET", "https://github.com/Dfarm-Tools/DFarm/blob/master/version")
       whr.Send()
       whr.WaitForResponse()
       lastVersion := whr.ResponseText
@@ -44,23 +42,16 @@ class Updater {
       this.UpdateVersionFile(lastVersion)
 
       if(lastVersion != this.version) {
-
-        whr := ComObject("WinHttp.WinHttpRequest.5.1")
-        whr.Open("GET", "https://api.dfarm.fr/release/last/zip")
-        whr.Send()
-        whr.WaitForResponse()
-        zipName := whr.ResponseText . ".zip"
-
         Text.Value := "Telechargement de la mise a jour ..."
 
-       this.InstallNewVersion(zipName)
+        this.InstallNewVersion(lastVersion)
       } else {
         this.RunLauncher()
       }
     }
 
     RunLauncher(){
-      Run(A_MyDocuments . "\DFarm\app\DFarmLauncher.exe")
+      Run(A_MyDocuments . "\DFarm\exe\DFarmLauncher.exe")
       ExitApp
     }
 
@@ -74,12 +65,12 @@ class Updater {
 
   
     
-    InstallNewVersion(zipName) {
-      Download("https://release.dfarm.fr/" . zipName, A_MyDocuments . "\DFarm\" . zipName)
-      this.Unz(A_MyDocuments . "\DFarm\" . zipName,  A_MyDocuments . "\DFarm\update")
+    InstallNewVersion(lastVersion) {
+      Download("https://github.com/Dfarm-Tools/DFarm/archive/refs/tags/" . lastVersion . ".zip", A_MyDocuments . "\DFarm\update.zip")
+      this.Unz(A_MyDocuments . "\DFarm\update.zip",  A_MyDocuments . "\DFarm\update")
 
       DirCopy( A_MyDocuments . "\DFarm\update\DFarm\assets", A_MyDocuments . "\DFarm\assets", true)
-      DirCopy( A_MyDocuments . "\DFarm\update\DFarm\app", A_MyDocuments . "\DFarm\app", true)
+      DirCopy( A_MyDocuments . "\DFarm\update\DFarm\exe", A_MyDocuments . "\DFarm\exe", true)
 
       if(not FileExist(A_MyDocuments . "\DFarm\conf.ini")) {
         FileCopy(A_MyDocuments . "\DFarm\update\DFarm\conf.ini", A_MyDocuments . "\DFarm\conf.ini") 
@@ -92,7 +83,7 @@ class Updater {
 
     CreateDir() {
         DirCreate(A_MyDocuments . "\DFarm")
-        DirCreate(A_MyDocuments . "\DFarm\app")
+        DirCreate(A_MyDocuments . "\DFarm\exe")
         DirCreate(A_MyDocuments . "\Dfarm\assets")
         DirCreate(A_MyDocuments . "\DFarm\characters")
     }
