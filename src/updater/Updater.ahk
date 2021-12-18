@@ -34,7 +34,7 @@ class Updater {
       checkUpdateGui.Show("w250")
   
       whr := ComObject("WinHttp.WinHttpRequest.5.1")
-      whr.Open("GET", "https://github.com/Dfarm-Tools/DFarm/blob/master/version")
+      whr.Open("GET", "https://raw.githubusercontent.com/Dfarm-Tools/DFarm/master/version")
       whr.Send()
       whr.WaitForResponse()
       lastVersion := whr.ResponseText
@@ -69,11 +69,11 @@ class Updater {
       Download("https://github.com/Dfarm-Tools/DFarm/archive/refs/tags/" . lastVersion . ".zip", A_MyDocuments . "\DFarm\update.zip")
       this.Unz(A_MyDocuments . "\DFarm\update.zip",  A_MyDocuments . "\DFarm\update")
 
-      DirCopy( A_MyDocuments . "\DFarm\update\DFarm\assets", A_MyDocuments . "\DFarm\assets", true)
-      DirCopy( A_MyDocuments . "\DFarm\update\DFarm\exe", A_MyDocuments . "\DFarm\exe", true)
+      DirCopy( A_MyDocuments . "\DFarm\update\DFarm-" . lastVersion . "\assets", A_MyDocuments . "\DFarm\assets", true)
+      DirCopy( A_MyDocuments . "\DFarm\update\DFarm-" . lastVersion . "\exe", A_MyDocuments . "\DFarm\exe", true)
 
       if(not FileExist(A_MyDocuments . "\DFarm\conf.ini")) {
-        FileCopy(A_MyDocuments . "\DFarm\update\DFarm\conf.ini", A_MyDocuments . "\DFarm\conf.ini") 
+        FileCopy(A_MyDocuments . "\DFarm\update\DFarm-" . lastVersion . "\conf.ini", A_MyDocuments . "\DFarm\conf.ini") 
       }
 
       DirDelete(A_MyDocuments . "\DFarm\update", true)
