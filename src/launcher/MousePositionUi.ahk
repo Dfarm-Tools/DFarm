@@ -60,7 +60,7 @@ class MousePositionUi {
     
     UpdateOSD(*)
     {
-        CoordMode("Mouse", "Screen")
+        CoordMode("Mouse", "Client")
         MouseGetPos &MouseX, &MouseY
         this.CoordTextX.Value := "X : " MouseX 
         this.CoordTextY.Value := "Y : " MouseY

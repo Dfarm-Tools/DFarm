@@ -116,10 +116,11 @@ class Characters {
         for key, character in this.characters
             {
                 if(key != 1) {
+                    Sleep(400)
                     ControlClick("x" . chatX1 . " y" . chatY1, this.characters[1])
                     Send('/invite ' . character . " {Enter}")
     
-                    Sleep(300)
+                    Sleep(500)
 
                     ControlClick("x" . groupX1 . " y" . groupY1, character)
         
