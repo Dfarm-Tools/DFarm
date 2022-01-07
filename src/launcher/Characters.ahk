@@ -191,7 +191,7 @@ class Characters {
         for character in this.characters
             {
                 if(changeWindow = 1) {
-                    WinActivate(character) 
+                    WinActivate(character . "::DFarm") 
                 }
 
                 ControlClick("x" . x1 . " y" . y1, character)
@@ -212,7 +212,7 @@ class Characters {
             this.currentCharacterIndex := this.currentCharacterIndex + 1
         }
     
-        WinActivate(this.characters[this.currentCharacterIndex]) 
+        WinActivate(this.characters[this.currentCharacterIndex] . "::DFarm") 
     }
     
     GoPrevious(*){
@@ -226,7 +226,7 @@ class Characters {
             this.currentCharacterIndex := this.currentCharacterIndex - 1
         }
     
-        WinActivate(this.characters[this.currentCharacterIndex]) 
+        WinActivate(this.characters[this.currentCharacterIndex] . "::DFarm") 
     }
 
     ; SEACH FUNC
@@ -243,7 +243,7 @@ class Characters {
             {
                 CoordMode("Pixel", "Screen")
                 if (ImageSearch(&FoundX, &FoundY, this.pseudoX1, this.pseudoY1, this.pseudoX2, this.pseudoY2, "*2 " . A_MyDocuments . "\Dfarm\characters\" . character . ".png")){
-                    WinActivate(character) 
+                    WinActivate(character . "::DFarm") 
                 }
             }
     }
