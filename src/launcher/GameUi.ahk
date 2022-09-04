@@ -7,6 +7,7 @@ class GameUi {
         this.WinTitle := 'DFarm - Game'
         this.switch := 0
         this.Characters := Characters()
+        this.command := '/travel [00,12]'
 
         this.switchOnGui := 0
         this.switchOffGui := 0
@@ -14,11 +15,10 @@ class GameUi {
         this.Characters.Init()
     }
 
-
     Create() {
-        
+
         this.Gui := Gui("-Caption +AlwaysOnTop",this.WinTitle)
-        this.Gui.Add("Picture", "x0 y20", A_MyDocuments . "\Dfarm\assets\game\background.png")
+        this.Gui.Add("Picture", "x0 y20 h410", A_MyDocuments . "\Dfarm\assets\game\background.png")
 
         icon := A_MyDocuments . "\Dfarm\assets\icon.ico"
         TraySetIcon(icon)
@@ -34,10 +34,10 @@ class GameUi {
         this.Gui.Add("Picture", "x5 y60 w160 h40 +BackgroundTrans", A_MyDocuments . "\Dfarm\assets\common\grouper.png")
         .OnEvent("Click", this.Characters.Group.Bind(this.Characters)) 
 
-        this.switchOffGui := this.Gui.Add("Picture", "x5 y120 w160 h40 +BackgroundTrans",  A_MyDocuments . "\Dfarm\assets\common\switch_off.png")
+        this.switchOffGui := this.Gui.Add("Picture", "x5 y120 w160 h40 +BackgroundTrans", A_MyDocuments . "\Dfarm\assets\common\switch_off.png")
         this.switchOffGui.OnEvent("Click", this.GetMethod('ChangeSwitch').Bind(this)) 
 
-        this.switchOnGui := this.Gui.Add("Picture", "x5 y120 w160 h40 +BackgroundTrans +Hidden",  A_MyDocuments . "\Dfarm\assets\common\switch_on.png")
+        this.switchOnGui := this.Gui.Add("Picture", "x5 y120 w160 h40 +BackgroundTrans +Hidden", A_MyDocuments . "\Dfarm\assets\common\switch_on.png")
         this.switchOnGui.OnEvent("Click", this.GetMethod('ChangeSwitch').Bind(this)) 
 
         this.Gui.Add("Picture", "x5 y180 w160 h40 +BackgroundTrans", A_MyDocuments . "\Dfarm\assets\common\rejoindre.png")
@@ -46,10 +46,21 @@ class GameUi {
         this.Gui.Add("Picture", "x5 y240 w160 h40 +BackgroundTrans", A_MyDocuments . "\Dfarm\assets\common\pret.png")
         .OnEvent("Click", this.Characters.Ready.Bind(this.Characters)) 
 
-        
-     
+        command := this.Gui.Add("Edit","x5 y305 w160 h25 vcommand")
+        command.OnEvent("Change", this.GetMethod('SetCommand').Bind(this))
 
-        this.Gui.Show("w170 h300")
+        this.Gui.Add("Picture", "x5 y335 w160 h40 +BackgroundTrans", A_MyDocuments . "\Dfarm\assets\common\exec.png")
+        .OnEvent("Click", this.GetMethod('ExecCommand').Bind(this)) 
+
+        this.Gui.Show("w170 h400")
+    }
+
+    SetCommand(GuiCtrlObj, Info){
+        this.command := GuiCtrlObj.Value
+    }
+
+    ExecCommand(*){
+        this.Characters.CommandInChat(this.command) 
     }
 
     ChangeSwitch(*){
@@ -59,7 +70,7 @@ class GameUi {
             this.switch := 1
             this.Characters.StartSearch()
         } else {
-            this.switchOffGui.Visible  := true
+            this.switchOffGui.Visible := true
             this.switchOnGui.Visible := false
             this.switch := 0
             this.Characters.StopSearch()
@@ -86,6 +97,5 @@ class GameUi {
             this.Create()
         } 
     }
-    
-   
+
 }

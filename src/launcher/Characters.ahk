@@ -2,13 +2,13 @@ class Characters {
     __New() {
         this.characters := []
         this.currentCharacterIndex := 0
-        
+
         this.pseudoX1 := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "pos", "pseudo_x1")
         this.pseudoY1 := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "pos", "pseudo_y1")
         this.pseudoX2 := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "pos", "pseudo_x2")
         this.pseudoY2 := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "pos", "pseudo_y2")
-        
-        this.changeWindow  := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "setting", "switch_on_move")
+
+        this.changeWindow := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "setting", "switch_on_move")
         this.clickMinDelay := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "delay", "click_delay_min")
         this.clickMaxDelay := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "delay", "click_delay_max")
 
@@ -74,6 +74,25 @@ class Characters {
         }
     }
 
+    SwitchShortCutEnable(state:= "On") {
+
+        if(state == "On") {
+            shortcutGlobal := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "setting", "shortcut_global")
+            shortcutClick := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "setting", "shortcut_click")
+            shortcutArrow := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "setting", "shortcut_arrow")
+
+            this.SetGlobalShortcut(shortcutGlobal)
+            this.SetClickShortcut(shortcutClick)
+            this.SetArrowShortcut(shortcutArrow)
+
+        } else {
+            this.SetGlobalShortcut("Off")
+            this.SetClickShortcut("Off")
+            this.SetArrowShortcut("Off")
+        }
+
+    }
+
     Init() {
         dfarmWindows := WinGetList("::DFarm")
         for this_id in dfarmWindows
@@ -82,9 +101,9 @@ class Characters {
             word_array := StrSplit(this_title, "::DFarm")
             this.characters.push(word_array[1])
         }
-    
+
         dofusWindows := WinGetList("- Dofus")
-    
+
         for this_id in dofusWindows
         {
             this_title := WinGetTitle(this_id)
@@ -93,17 +112,11 @@ class Characters {
             WinSetTitle(word_array[1] . "::DFarm", this_title)
         }
 
-        shortcutGlobal := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "setting", "shortcut_global")
-        shortcutClick := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "setting", "shortcut_click")
-        shortcutArrow := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "setting", "shortcut_arrow")
-
-        this.SetGlobalShortcut(shortcutGlobal)
-        this.SetClickShortcut(shortcutClick)
-        this.SetArrowShortcut(shortcutArrow)
+        this.SwitchShortCutEnable("On")
     }
 
     Group(*) {
-        
+
         chatX1 := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "pos", "chat_x1")
         chatY1 := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "pos", "chat_y1")
 
@@ -113,23 +126,53 @@ class Characters {
         groupMinDelay := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "delay", "group_delay_min")
         groupMaxDelay := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "delay", "group_delay_max")
 
-        for key, character in this.characters
-            {
-                if(key != 1) {
-                    Sleep(400)
-                    ControlClick("x" . chatX1 . " y" . chatY1, this.characters[1])
-                    Send('/invite ' . character . " {Enter}")
-    
-                    Sleep(500)
+        this.SwitchShortCutEnable('Off')
 
-                    ControlClick("x" . groupX1 . " y" . groupY1, character)
-        
-                    if(groupMaxDelay != 0) {
-                        delay := Random(groupMinDelay, groupMaxDelay)
-                        Sleep(delay)
-                    }
-                }
+        WinActivate(this.characters[1] . "::DFarm") 
+
+        Sleep(500)
+
+        for key, character in this.characters
+        {
+            Sleep(300)
+            WinActivate(character . "::DFarm") 
+            Sleep(300)
+            if(key != 1) {
+                ControlClick("x" . groupX1 . " y" . groupY1, character)
+                Sleep(300) 
+            } 
+            if(this.characters.Length != key) {
+                ControlClick("x" . chatX1 . " y" . chatY1, character)
+                Sleep(300) 
+                Send("/invite " . this.characters[key + 1] . " {Enter}") 
             }
+
+        }
+
+        this.SwitchShortCutEnable('On')
+
+    }
+
+    CommandInChat(execCommand) {
+
+        chatX1 := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "pos", "chat_x1")
+        chatY1 := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "pos", "chat_y1")
+
+        this.SwitchShortCutEnable('Off')
+
+        for key, character in this.characters
+        { 
+            Sleep(300) 
+            WinActivate(character . "::DFarm") 
+            Sleep(300) 
+            ControlClick("x" . chatX1 . " y" . chatY1, character)
+            Sleep(300) 
+            Send(execCommand . " {Enter}")
+            Sleep(400) 
+
+        }
+
+        this.SwitchShortCutEnable('On')
     }
 
     Ready(*) {
@@ -153,7 +196,6 @@ class Characters {
         delay := Random(this.clickMinDelay, this.clickMaxDelay)
         this.ClickAllTo(x1, y1, delay)
     }
-    
 
     MoveRight(*) {
         x1 := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "pos", "right_x1")
@@ -189,43 +231,43 @@ class Characters {
 
     ClickAllTo(x1, y1, delay := 0, changeWindow := 0) {
         for character in this.characters
-            {
-                if(changeWindow = 1) {
-                    WinActivate(character . "::DFarm") 
-                }
-
-                ControlClick("x" . x1 . " y" . y1, character)
-                if(delay != 0) {
-                    Sleep delay
-                }
+        {
+            if(changeWindow = 1) {
+                WinActivate(character . "::DFarm") 
             }
+
+            ControlClick("x" . x1 . " y" . y1, character)
+            if(delay != 0) {
+                Sleep delay
+            }
+        }
     }
 
     GoNext(*){
         if(this.characters.Length = 0) {
             return
         }
-    
+
         if(this.currentCharacterIndex = 0 or this.currentCharacterIndex = this.characters.Length) {
             this.currentCharacterIndex := 1
         } else {
             this.currentCharacterIndex := this.currentCharacterIndex + 1
         }
-    
+
         WinActivate(this.characters[this.currentCharacterIndex] . "::DFarm") 
     }
-    
+
     GoPrevious(*){
         if(this.characters.Length = 0) {
             return
         }
-    
+
         if(this.currentCharacterIndex = 0 or this.currentCharacterIndex = 1) {
             this.currentCharacterIndex := this.characters.Length
         } else {
             this.currentCharacterIndex := this.currentCharacterIndex - 1
         }
-    
+
         WinActivate(this.characters[this.currentCharacterIndex] . "::DFarm") 
     }
 
@@ -240,12 +282,12 @@ class Characters {
 
     TickSeach() {
         for character in this.characters
-            {
-                CoordMode("Pixel", "Screen")
-                if (ImageSearch(&FoundX, &FoundY, this.pseudoX1, this.pseudoY1, this.pseudoX2, this.pseudoY2, "*2 " . A_MyDocuments . "\Dfarm\characters\" . character . ".png")){
-                    WinActivate(character . "::DFarm") 
-                }
+        {
+            CoordMode("Pixel", "Screen")
+            if (ImageSearch(&FoundX, &FoundY, this.pseudoX1, this.pseudoY1, this.pseudoX2, this.pseudoY2, "*2 " . A_MyDocuments . "\Dfarm\characters\" . character . ".png")){
+                WinActivate(character . "::DFarm") 
             }
+        }
     }
     ; ---------------
 }
