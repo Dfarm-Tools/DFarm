@@ -85,7 +85,6 @@ class Updater {
         DirCreate(A_MyDocuments . "\DFarm")
         DirCreate(A_MyDocuments . "\DFarm\exe")
         DirCreate(A_MyDocuments . "\Dfarm\assets")
-        DirCreate(A_MyDocuments . "\DFarm\characters")
     }
 
 }
