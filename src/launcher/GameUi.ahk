@@ -68,12 +68,12 @@ class GameUi {
             this.switchOffGui.Visible := false
             this.switchOnGui.Visible := true
             this.switch := 1
-            this.Characters.StartSearch()
+            this.Characters.StartAutoSwitch()
         } else {
             this.switchOffGui.Visible := true
             this.switchOnGui.Visible := false
             this.switch := 0
-            this.Characters.StopSearch()
+            this.Characters.StopAutoSwitch()
         }
     }
 
@@ -84,7 +84,7 @@ class GameUi {
     Close(*) {
         this.LauncherUi := LauncherUi()
         this.LauncherUi.Show()
-        this.Characters.StopSearch()
+        this.Characters.StopAutoSwitch()
         this.Characters.SetGlobalShortcut("Off")
         this.Characters.SetClickShortcut("Off")
         this.Characters.SetArrowShortcut("Off")

@@ -1,12 +1,11 @@
-# DFarm
+# DFarm - DOFUS UNITY ONLY ! 
 
-## Dfarm est un tool de gestion de compte pour Dofus 2
+## Dfarm est un tool de gestion de compte pour Dofus Unity
 
 Language : AHK 2
 
 ###  **Utile pour build:** 
  - [***Télécharger AHK 2***](https://www.autohotkey.com/) 	 
- - [***Télécharger la beta de Ahk2Exe***](https://github.com/AutoHotkey/Ahk2Exe)
 
 
 ## Comment lancer ?

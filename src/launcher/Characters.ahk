@@ -12,8 +12,7 @@ class Characters {
         this.clickMinDelay := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "delay", "click_delay_min")
         this.clickMaxDelay := IniRead(A_MyDocuments . "\Dfarm\conf.ini", "delay", "click_delay_max")
 
-        this.searchInterval := 800
-        this.search := ObjBindMethod(this, "TickSeach")
+        this.autoSwitch := false
     }
 
     SetGlobalShortcut(state:= "On")
@@ -94,24 +93,20 @@ class Characters {
     }
 
     Init() {
-        dfarmWindows := WinGetList("::DFarm")
-        for this_id in dfarmWindows
+        ids := WinGetList()
+        for this_id in ids
         {
+            this_class := WinGetClass(this_id)
             this_title := WinGetTitle(this_id)
-            word_array := StrSplit(this_title, "::DFarm")
-            this.characters.push(word_array[1])
+            if(this_class == "UnityWndClass")
+            {
+                if(this_title != "Dofus") {
+                    this.characters.push(this_title)
+                }
+            }
         }
 
-        dofusWindows := WinGetList("- Dofus")
-
-        for this_id in dofusWindows
-        {
-            this_title := WinGetTitle(this_id)
-            word_array := StrSplit(this_title, " - Dofus")
-            this.characters.push(word_array[1])
-            WinSetTitle(word_array[1] . "::DFarm", this_title)
-        }
-
+        this.StartMonitoring()
         this.SwitchShortCutEnable("On")
     }
 
@@ -128,14 +123,14 @@ class Characters {
 
         this.SwitchShortCutEnable('Off')
 
-        WinActivate(this.characters[1] . "::DFarm") 
+        WinActivate(this.characters[1]) 
 
         Sleep(500)
 
         for key, character in this.characters
         {
             Sleep(300)
-            WinActivate(character . "::DFarm") 
+            WinActivate(character) 
             Sleep(300)
             if(key != 1) {
                 ControlClick("x" . groupX1 . " y" . groupY1, character)
@@ -163,7 +158,7 @@ class Characters {
         for key, character in this.characters
         { 
             Sleep(300) 
-            WinActivate(character . "::DFarm") 
+            WinActivate(character) 
             Sleep(300) 
             ControlClick("x" . chatX1 . " y" . chatY1, character)
             Sleep(300) 
@@ -233,7 +228,7 @@ class Characters {
         for character in this.characters
         {
             if(changeWindow = 1) {
-                WinActivate(character . "::DFarm") 
+                WinActivate(character) 
             }
 
             ControlClick("x" . x1 . " y" . y1, character)
@@ -254,7 +249,7 @@ class Characters {
             this.currentCharacterIndex := this.currentCharacterIndex + 1
         }
 
-        WinActivate(this.characters[this.currentCharacterIndex] . "::DFarm") 
+        WinActivate(this.characters[this.currentCharacterIndex]) 
     }
 
     GoPrevious(*){
@@ -268,26 +263,33 @@ class Characters {
             this.currentCharacterIndex := this.currentCharacterIndex - 1
         }
 
-        WinActivate(this.characters[this.currentCharacterIndex] . "::DFarm") 
+        WinActivate(this.characters[this.currentCharacterIndex]) 
     }
 
     ; SEACH FUNC
-    StartSearch() {
-        SetTimer(this.search, this.searchInterval, -500)
+    StartAutoSwitch() {
+        this.autoSwitch := true
     }
 
-    StopSearch() {
-        SetTimer(this.search, 0)
+    StopAutoSwitch() {
+        this.autoSwitch := false
     }
 
-    TickSeach() {
-        for character in this.characters
-        {
-            CoordMode("Pixel", "Screen")
-            if (ImageSearch(&FoundX, &FoundY, this.pseudoX1, this.pseudoY1, this.pseudoX2, this.pseudoY2, "*2 " . A_MyDocuments . "\Dfarm\characters\" . character . ".png")){
-                WinActivate(character . "::DFarm") 
+    StartMonitoring() {
+        DllCall("RegisterShellHookWindow", "Ptr", A_ScriptHwnd)
+        OnMessage(DllCall("RegisterWindowMessage", "Str","SHELLHOOK"), this.ShellMessage.Bind(this))
+    }
+
+    ShellMessage(wParam, lParam, msg, hWnd) {
+         If (wParam != 0x8006  || !this.autoSwitch) {
+            return
+         }
+        winTitle := WinGetTitle(lParam)
+        for character in this.characters {
+            if InStr(winTitle, character) {
+                WinActivate(winTitle)
+                break
             }
         }
     }
-    ; ---------------
 }
